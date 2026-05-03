@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LinguaFlash – Procvičování angličtiny</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+:root {
+–cream: #FDF6EC;
+–amber: #E8A020;
+–amber-light: #F5C060;
+–amber-dark: #C07810;
+–forest: #2D4A3E;
+–forest-light: #3D6050;
+–coral: #E85C40;
+–green: #4CAF50;
+–sky: #4A90C8;
+–text-dark: #1A2820;
+–text-mid: #4A5E54;
+–text-light: #8AA098;
+–card-bg: #FFFFFF;
+–shadow: 0 4px 24px rgba(30,60,40,0.10);
+–shadow-lg: 0 12px 48px rgba(30,60,40,0.15);
+–radius: 20px;
+–radius-sm: 12px;
+}
+
+- { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: ‘DM Sans’, sans-serif; background: var(–cream); color: var(–text-dark); min-height: 100vh; overflow-x: hidden; }
+  body::before { content: ‘’; position: fixed; top: -200px; right: -200px; width: 600px; height: 600px; background: radial-gradient(circle, rgba(232,160,32,0.12) 0%, transparent 70%); pointer-events: none; z-index: 0; }
+
+.screen { display: none; min-height: 100vh; position: relative; z-index: 1; }
+.screen.active { display: flex; flex-direction: column; }
+
+.app-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 22px; background: rgba(255,251,245,0.92); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(232,160,32,0.15); position: sticky; top: 0; z-index: 100; }
+.logo { font-family: ‘Playfair Display’, serif; font-size: 1.4rem; font-weight: 900; color: var(–forest); }
+.logo span { color: var(–amber); }
+.header-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 10px 18px; border: none; border-radius: 100px; font-family: ‘DM Sans’, sans-serif; font-size: 0.88rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; white-space: nowrap; }
+.btn-primary { background: var(–forest); color: var(–cream); box-shadow: 0 2px 12px rgba(45,74,62,0.3); }
+.btn-primary:hover { background: var(–forest-light); transform: translateY(-1px); }
+.btn-amber { background: var(–amber); color: white; box-shadow: 0 2px 12px rgba(232,160,32,0.35); }
+.btn-amber:hover { background: var(–amber-dark); transform: translateY(-1px); }
+.btn-ghost { background: transparent; color: var(–text-mid); border: 1.5px solid rgba(74,94,84,0.2); }
+.btn-ghost:hover { background: rgba(45,74,62,0.06); }
+.btn-coral { background: var(–coral); color: white; box-shadow: 0 2px 12px rgba(232,92,64,0.25); }
+.btn-coral:hover { filter: brightness(1.08); transform: translateY(-1px); }
+.btn-sky { background: var(–sky); color: white; box-shadow: 0 2px 12px rgba(74,144,200,0.3); }
+.btn-sky:hover { filter: brightness(1.08); transform: translateY(-1px); }
+.btn-lg { padding: 16px 24px; font-size: 1rem; border-radius: var(–radius-sm); }
+.btn:active { transform: scale(0.97) !important; }
+
+/* HOME */
+#screen-home { align-items: center; justify-content: center; padding: 32px 20px; }
+.hero { max-width: 600px; width: 100%; text-align: center; }
+.hero-badge { display: inline-block; background: rgba(232,160,32,0.15); color: var(–amber-dark); border: 1.5px solid rgba(232,160,32,0.3); border-radius: 100px; padding: 6px 16px; font-size: 0.76rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 18px; }
+.hero h1 { font-family: ‘Playfair Display’, serif; font-size: clamp(1.9rem, 5vw, 2.9rem); font-weight: 900; line-height: 1.1; color: var(–forest); margin-bottom: 12px; }
+.hero > p { font-size: 0.96rem; color: var(–text-mid); line-height: 1.7; margin-bottom: 26px; }
+
+.stats-bar { display: flex; gap: 12px; justify-content: center; margin-bottom: 26px; flex-wrap: wrap; }
+.stat-pill { background: var(–card-bg); border: 1.5px solid rgba(45,74,62,0.1); border-radius: 100px; padding: 9px 18px; display: flex; align-items: center; gap: 9px; box-shadow: var(–shadow); }
+.stat-num { font-family: ‘Playfair Display’, serif; font-size: 1.3rem; font-weight: 700; color: var(–forest); }
+.stat-label { font-size: 0.76rem; color: var(–text-light); font-weight: 500; }
+
+.section-title { font-family: ‘Playfair Display’, serif; color: var(–forest); margin-bottom: 12px; font-size: 1rem; text-align: left; }
+
+.mode-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 10px; }
+.mode-card { background: var(–card-bg); border: 2px solid transparent; border-radius: var(–radius); padding: 18px 10px; cursor: pointer; transition: all 0.22s ease; text-align: center; box-shadow: var(–shadow); }
+.mode-card:hover { transform: translateY(-3px); box-shadow: var(–shadow-lg); }
+.mode-card.selected { border-color: var(–amber); background: rgba(232,160,32,0.06); }
+.mode-icon { font-size: 1.6rem; margin-bottom: 7px; }
+.mode-card h3 { font-size: 0.8rem; font-weight: 600; color: var(–text-dark); margin-bottom: 3px; }
+.mode-card p { font-size: 0.7rem; color: var(–text-light); line-height: 1.4; }
+
+/* Study card (context reading mode) */
+.study-card-btn { width: 100%; margin-top: 8px; margin-bottom: 18px; background: rgba(74,144,200,0.08); border: 2px solid rgba(74,144,200,0.25); border-radius: var(–radius); padding: 16px 20px; cursor: pointer; text-align: left; display: flex; align-items: center; gap: 16px; transition: all 0.2s; }
+.study-card-btn:hover { background: rgba(74,144,200,0.14); border-color: var(–sky); transform: translateY(-2px); }
+.study-card-icon { font-size: 2rem; flex-shrink: 0; }
+.study-card-text h3 { font-size: 0.9rem; font-weight: 600; color: var(–sky); margin-bottom: 3px; }
+.study-card-text p { font-size: 0.76rem; color: var(–text-mid); line-height: 1.4; }
+
+.guide-section { background: var(–card-bg); border: 1.5px solid rgba(232,160,32,0.25); border-radius: var(–radius); padding: 18px 20px; margin-bottom: 22px; box-shadow: var(–shadow); text-align: left; }
+.guide-section h3 { font-family: ‘Playfair Display’, serif; font-size: 0.96rem; font-weight: 700; color: var(–forest); margin-bottom: 10px; }
+.guide-section ol { padding-left: 17px; }
+.guide-section li { font-size: 0.82rem; color: var(–text-mid); margin-bottom: 5px; line-height: 1.6; }
+.guide-section li strong { color: var(–forest); }
+
+/* IMPORT */
+#screen-import { padding: 0; }
+.import-container { max-width: 720px; width: 100%; margin: 0 auto; padding: 30px 22px; flex: 1; }
+.import-container h2 { font-family: ‘Playfair Display’, serif; font-size: 1.55rem; font-weight: 900; color: var(–forest); margin-bottom: 5px; }
+.import-container > p { color: var(–text-mid); margin-bottom: 16px; font-size: 0.9rem; }
+.format-hint { background: rgba(45,74,62,0.05); border: 1.5px solid rgba(45,74,62,0.1); border-radius: var(–radius-sm); padding: 13px 16px; margin-bottom: 13px; font-size: 0.81rem; color: var(–text-mid); line-height: 1.8; }
+.format-hint strong { color: var(–forest); }
+.format-hint code { background: rgba(45,74,62,0.1); padding: 1px 5px; border-radius: 4px; font-family: monospace; }
+textarea { width: 100%; height: 250px; background: var(–card-bg); border: 2px solid rgba(45,74,62,0.15); border-radius: var(–radius-sm); padding: 14px 16px; font-family: ‘DM Sans’, sans-serif; font-size: 0.89rem; line-height: 1.7; color: var(–text-dark); resize: vertical; outline: none; transition: border-color 0.2s; }
+textarea:focus { border-color: var(–amber); }
+textarea::placeholder { color: var(–text-light); }
+.import-actions { display: flex; gap: 9px; margin-top: 13px; flex-wrap: wrap; }
+.parsed-preview { margin-top: 16px; background: var(–card-bg); border: 1.5px solid rgba(45,74,62,0.12); border-radius: var(–radius); overflow: hidden; box-shadow: var(–shadow); }
+.preview-header { padding: 11px 16px; background: rgba(45,74,62,0.05); border-bottom: 1px solid rgba(45,74,62,0.08); font-size: 0.8rem; font-weight: 600; color: var(–forest); display: flex; justify-content: space-between; }
+.preview-list { max-height: 260px; overflow-y: auto; }
+.preview-item { display: flex; align-items: center; padding: 8px 16px; border-bottom: 1px solid rgba(45,74,62,0.05); font-size: 0.83rem; gap: 8px; }
+.preview-item:last-child { border-bottom: none; }
+.preview-item .eng { font-weight: 600; color: var(–forest); flex: 1; }
+.preview-item .cz { color: var(–text-mid); flex: 1; }
+.preview-item .del-btn { background: none; border: none; cursor: pointer; color: var(–text-light); font-size: 0.9rem; padding: 2px 6px; border-radius: 4px; transition: all 0.15s; flex-shrink: 0; }
+.preview-item .del-btn:hover { color: var(–coral); }
+
+/* PRACTICE */
+#screen-practice { padding: 0; }
+.practice-layout { max-width: 580px; width: 100%; margin: 0 auto; padding: 22px 18px; flex: 1; display: flex; flex-direction: column; }
+
+.progress-section { margin-bottom: 16px; }
+.progress-meta { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(–text-mid); margin-bottom: 7px; font-weight: 500; }
+.progress-bar-wrap { height: 7px; background: rgba(45,74,62,0.1); border-radius: 100px; overflow: hidden; }
+.progress-bar-fill { height: 100%; border-radius: 100px; background: linear-gradient(90deg, var(–amber-light), var(–amber)); transition: width 0.5s cubic-bezier(0.4,0,0.2,1); }
+
+.mode-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(45,74,62,0.08); color: var(–forest); border-radius: 100px; padding: 4px 13px; font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 13px; }
+
+.flashcard { background: var(–card-bg); border-radius: var(–radius); padding: 36px 28px; box-shadow: var(–shadow-lg); margin-bottom: 16px; flex: 1; max-height: 370px; display: flex; flex-direction: column; justify-content: center; position: relative; overflow: hidden; cursor: pointer; user-select: none; animation: cardIn 0.33s cubic-bezier(0.4,0,0.2,1); }
+.flashcard:active { opacity: 0.95; }
+@keyframes cardIn { from { opacity: 0; transform: translateY(10px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+.flashcard::before { content: ‘’; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, var(–amber-light), var(–amber)); transition: background 0.4s; }
+.flashcard.revealed::before { background: linear-gradient(90deg, #81C784, var(–green)); }
+
+.card-label { font-size: 0.7rem; font-weight: 600; color: var(–text-light); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 13px; }
+.card-word { font-family: ‘Playfair Display’, serif; font-size: clamp(1.4rem, 4vw, 2.1rem); font-weight: 700; color: var(–forest); line-height: 1.2; }
+.card-hint { margin-top: 26px; font-size: 0.78rem; color: var(–text-light); text-align: center; }
+.card-answer { margin-top: 20px; padding-top: 18px; border-top: 1.5px dashed rgba(45,74,62,0.15); font-family: ‘Playfair Display’, serif; font-size: clamp(1.1rem, 3.5vw, 1.6rem); font-weight: 700; color: var(–green); line-height: 1.3; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Confidence buttons */
+.conf-row { display: flex; gap: 10px; }
+.conf-btn { flex: 1; padding: 14px 8px; border: 2px solid transparent; border-radius: var(–radius-sm); font-family: ‘DM Sans’, sans-serif; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.conf-btn .ci { font-size: 1.3rem; }
+.conf-btn.hard { border-color: rgba(232,92,64,0.3); color: var(–coral); background: rgba(232,92,64,0.06); }
+.conf-btn.hard:hover { background: rgba(232,92,64,0.13); border-color: var(–coral); }
+.conf-btn.medium { border-color: rgba(232,160,32,0.3); color: var(–amber-dark); background: rgba(232,160,32,0.06); }
+.conf-btn.medium:hover { background: rgba(232,160,32,0.13); border-color: var(–amber); }
+.conf-btn.easy { border-color: rgba(76,175,80,0.3); color: #2E7D32; background: rgba(76,175,80,0.06); }
+.conf-btn.easy:hover { background: rgba(76,175,80,0.13); border-color: var(–green); }
+.conf-btn:active { transform: scale(0.96); }
+
+/* STUDY SCREEN */
+#screen-study { padding: 0; }
+.study-layout { max-width: 720px; width: 100%; margin: 0 auto; padding: 28px 22px; flex: 1; }
+.study-layout h2 { font-family: ‘Playfair Display’, serif; font-size: 1.55rem; font-weight: 900; color: var(–forest); margin-bottom: 6px; }
+.study-layout > .subtitle { color: var(–text-mid); margin-bottom: 24px; font-size: 0.9rem; }
+
+.study-word-card { background: var(–card-bg); border-radius: var(–radius); padding: 24px 26px; margin-bottom: 16px; box-shadow: var(–shadow); border: 1.5px solid rgba(45,74,62,0.06); }
+.study-word-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 6px; flex-wrap: wrap; gap: 8px; }
+.study-word-en { font-family: ‘Playfair Display’, serif; font-size: 1.25rem; font-weight: 700; color: var(–forest); }
+.study-word-cz { font-size: 0.88rem; color: var(–text-mid); font-style: italic; }
+.study-sentences { margin-top: 14px; display: flex; flex-direction: column; gap: 9px; }
+.study-sentence { font-size: 0.88rem; color: var(–text-mid); line-height: 1.65; padding: 10px 14px; background: rgba(45,74,62,0.04); border-left: 3px solid var(–amber-light); border-radius: 0 8px 8px 0; }
+.study-sentence strong { color: var(–forest); font-weight: 600; }
+.study-loading { text-align: center; padding: 32px 20px; color: var(–text-light); font-size: 0.9rem; }
+.study-loading .spinner { display: inline-block; width: 24px; height: 24px; border: 2.5px solid rgba(45,74,62,0.15); border-top-color: var(–amber); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 10px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.study-error { background: rgba(232,92,64,0.07); border: 1.5px solid rgba(232,92,64,0.2); border-radius: var(–radius-sm); padding: 14px 18px; font-size: 0.86rem; color: var(–coral); margin-bottom: 16px; }
+.load-more-btn { width: 100%; padding: 14px; background: rgba(74,144,200,0.08); border: 2px dashed rgba(74,144,200,0.3); border-radius: var(–radius-sm); color: var(–sky); font-family: ‘DM Sans’, sans-serif; font-size: 0.88rem; font-weight: 600; cursor: pointer; transition: all 0.2s; margin-top: 4px; }
+.load-more-btn:hover { background: rgba(74,144,200,0.14); }
+
+/* RESULTS */
+#screen-results { padding: 0; }
+.results-container { max-width: 720px; width: 100%; margin: 0 auto; padding: 30px 22px; flex: 1; }
+.results-container h2 { font-family: ‘Playfair Display’, serif; font-size: 1.7rem; font-weight: 900; color: var(–forest); margin-bottom: 5px; }
+.results-container > .subtitle { color: var(–text-mid); margin-bottom: 24px; }
+.result-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-bottom: 24px; }
+.result-card { background: var(–card-bg); border-radius: var(–radius-sm); padding: 18px 14px; text-align: center; box-shadow: var(–shadow); }
+.result-card .num { font-family: ‘Playfair Display’, serif; font-size: 2rem; font-weight: 900; margin-bottom: 3px; }
+.result-card .lbl { font-size: 0.74rem; color: var(–text-light); font-weight: 500; }
+.result-card.green .num { color: var(–green); }
+.result-card.amber .num { color: var(–amber); }
+.result-card.red .num { color: var(–coral); }
+.result-card.blue .num { color: var(–sky); }
+.word-table { background: var(–card-bg); border-radius: var(–radius); overflow: hidden; box-shadow: var(–shadow); margin-bottom: 22px; }
+.word-table-header { display: grid; grid-template-columns: 1fr 1fr 90px; padding: 9px 16px; background: rgba(45,74,62,0.05); font-size: 0.72rem; font-weight: 700; color: var(–text-light); text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 1px solid rgba(45,74,62,0.08); }
+.word-row { display: grid; grid-template-columns: 1fr 1fr 90px; padding: 9px 16px; border-bottom: 1px solid rgba(45,74,62,0.05); font-size: 0.83rem; align-items: center; }
+.word-row:last-child { border-bottom: none; }
+.word-row .eng { font-weight: 600; color: var(–forest); }
+.word-row .cz { color: var(–text-mid); }
+.mastery-bar { height: 5px; background: rgba(45,74,62,0.1); border-radius: 100px; overflow: hidden; }
+.mastery-fill { height: 100%; border-radius: 100px; }
+
+.toast-container { position: fixed; bottom: 18px; right: 18px; z-index: 1000; display: flex; flex-direction: column; gap: 7px; }
+.toast { background: var(–forest); color: var(–cream); border-radius: var(–radius-sm); padding: 11px 16px; font-size: 0.84rem; font-weight: 500; box-shadow: var(–shadow-lg); animation: toastIn 0.3s ease; max-width: 290px; }
+@keyframes toastIn { from { opacity: 0; transform: translateX(18px); } to { opacity: 1; transform: translateX(0); } }
+
+.hidden { display: none !important; }
+
+@media (max-width: 480px) {
+.mode-grid { gap: 7px; }
+.mode-card { padding: 13px 7px; }
+.mode-icon { font-size: 1.4rem; }
+.flashcard { padding: 26px 18px; }
+.conf-row { gap: 7px; }
+.word-table-header, .word-row { grid-template-columns: 1fr 1fr; }
+.word-table-header > :last-child, .word-row > :last-child { display: none; }
+.header-actions .btn { padding: 8px 12px; font-size: 0.8rem; }
+}
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-thumb { background: rgba(45,74,62,0.2); border-radius: 3px; }
+</style>
+
+</head>
+<body>
+
+<!-- ═══ HOME ═══ -->
+
+<div id="screen-home" class="screen active">
+  <header class="app-header">
+    <div class="logo">Lingua<span>Flash</span></div>
+    <div class="header-actions">
+      <button class="btn btn-ghost" onclick="showScreen('screen-results')">📊 Výsledky</button>
+      <button class="btn btn-primary" onclick="showScreen('screen-import')">➕ Přidat slova</button>
+    </div>
+  </header>
+  <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;padding:28px 20px;">
+    <div class="hero">
+      <div class="hero-badge">🇬🇧 Anglická slovíčka</div>
+      <h1>Procvičuj, opakuj,<br>zvládni angličtinu.</h1>
+      <p>Uvidíš kartu, řekneš překlad nahlas, pak klikneš jak ti to šlo. Žádné psaní.</p>
+
+```
+  <div class="stats-bar">
+    <div class="stat-pill"><div class="stat-num" id="stat-words">0</div><div class="stat-label">Slovíček</div></div>
+    <div class="stat-pill"><div class="stat-num" id="stat-learned">0</div><div class="stat-label">Zvládnuto</div></div>
+    <div class="stat-pill"><div class="stat-num" id="stat-sessions">0</div><div class="stat-label">Sezení</div></div>
+  </div>
+
+  <div class="guide-section" id="guide-section">
+    <h3>📖 Jak začít</h3>
+    <ol>
+      <li>Klikni na <strong>Přidat slova</strong> a vlož seznam ve formátu <em>angličtina = čeština</em></li>
+      <li>Vyber směr překladu a klikni <strong>Začít procvičovat</strong></li>
+      <li>Klepni na kartu pro odpověď, pak označ jak ti to šlo</li>
+      <li>V sekci <strong>Příklady vět</strong> si přečti, jak se slovíčka používají v praxi</li>
+    </ol>
+  </div>
+
+  <p class="section-title">Vyber směr překladu</p>
+  <div class="mode-grid">
+    <div class="mode-card selected" data-mode="en-to-cz" onclick="selectMode(this)">
+      <div class="mode-icon">🇬🇧→🇨🇿</div>
+      <h3>EN → CZ</h3>
+      <p>Vidíš anglicky, říkáš česky</p>
+    </div>
+    <div class="mode-card" data-mode="cz-to-en" onclick="selectMode(this)">
+      <div class="mode-icon">🇨🇿→🇬🇧</div>
+      <h3>CZ → EN</h3>
+      <p>Vidíš česky, říkáš anglicky</p>
+    </div>
+    <div class="mode-card" data-mode="mixed" onclick="selectMode(this)">
+      <div class="mode-icon">🔀</div>
+      <h3>Mix</h3>
+      <p>Střídá oba směry</p>
+    </div>
+  </div>
+
+  <button class="btn btn-amber btn-lg" onclick="startPractice()" style="width:100%;margin-top:4px;">
+    ▶ Začít procvičovat
+  </button>
+
+  <button class="study-card-btn" onclick="startStudy()">
+    <div class="study-card-icon">📖</div>
+    <div class="study-card-text">
+      <h3>Příklady vět</h3>
+      <p>Pročti si, jak se slovíčka používají v reálných větách — pro lepší porozumění kontextu</p>
+    </div>
+  </button>
+</div>
+```
+
+  </div>
+</div>
+
+<!-- ═══ IMPORT ═══ -->
+
+<div id="screen-import" class="screen">
+  <header class="app-header">
+    <div class="logo">Lingua<span>Flash</span></div>
+    <button class="btn btn-ghost" onclick="showScreen('screen-home')">← Zpět</button>
+  </header>
+  <div class="import-container">
+    <h2>Přidat slovíčka</h2>
+    <p>Vložte seznam slovíček — každé na nový řádek.</p>
+    <div class="format-hint">
+      <strong>Formát:</strong> <code>anglicky = česky</code> nebo <code>anglicky - česky</code> nebo s tabulátorem<br>
+      Příklad: <code>to accomplish = dosáhnout, splnit</code>
+    </div>
+    <textarea id="import-textarea" placeholder="to accomplish = dosáhnout&#10;daunting = skličující&#10;to leverage = vytěžit maximum z"></textarea>
+    <div class="import-actions">
+      <button class="btn btn-primary" onclick="parseAndPreview()">👁 Náhled</button>
+      <button class="btn btn-amber" onclick="importWords()" id="import-confirm" style="display:none">✔ Přidat</button>
+      <button class="btn btn-ghost" onclick="clearImport()">🗑 Vymazat</button>
+    </div>
+    <div class="parsed-preview hidden" id="parsed-preview">
+      <div class="preview-header">
+        <span id="preview-count">0 slovíček</span>
+        <span style="color:var(--text-light);font-size:0.73rem;">✕ pro odebrání</span>
+      </div>
+      <div class="preview-list" id="preview-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PRACTICE ═══ -->
+
+<div id="screen-practice" class="screen">
+  <header class="app-header">
+    <div class="logo">Lingua<span>Flash</span></div>
+    <button class="btn btn-ghost" onclick="endSession()">⏹ Ukončit</button>
+  </header>
+  <div class="practice-layout">
+    <div class="progress-section">
+      <div class="progress-meta">
+        <span id="card-counter">1 / 20</span>
+        <span id="session-score">✓ 0 &nbsp;✗ 0</span>
+      </div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progress-fill" style="width:0%"></div></div>
+    </div>
+
+```
+<div class="mode-badge" id="practice-mode-badge">🇬🇧→🇨🇿 Přelož do češtiny</div>
+
+<div class="flashcard" id="flashcard" onclick="revealAnswer()">
+  <div class="card-label" id="card-label">Přelož do češtiny:</div>
+  <div class="card-word" id="card-word"></div>
+  <div class="card-hint" id="card-hint">👆 Klepni pro zobrazení odpovědi</div>
+  <div class="card-answer hidden" id="card-answer"></div>
+</div>
+
+<div class="conf-row hidden" id="conf-row">
+  <button class="conf-btn hard" onclick="rate(1)"><span class="ci">😣</span>Těžké</button>
+  <button class="conf-btn medium" onclick="rate(2)"><span class="ci">🤔</span>Zvládám</button>
+  <button class="conf-btn easy" onclick="rate(3)"><span class="ci">😊</span>Umím</button>
+</div>
+```
+
+  </div>
+</div>
+
+<!-- ═══ STUDY ═══ -->
+
+<div id="screen-study" class="screen">
+  <header class="app-header">
+    <div class="logo">Lingua<span>Flash</span></div>
+    <button class="btn btn-ghost" onclick="showScreen('screen-home')">← Zpět</button>
+  </header>
+  <div class="study-layout">
+    <h2>Příklady vět</h2>
+    <p class="subtitle">Pročti si, jak se každé slovíčko používá v reálných větách. AI generuje příklady přímo pro tvůj seznam.</p>
+
+```
+<div id="study-content">
+  <div class="study-loading">
+    <div class="spinner"></div>
+    <div id="study-loading-text">Generuji příkladové věty…</div>
+  </div>
+</div>
+```
+
+  </div>
+</div>
+
+<!-- ═══ RESULTS ═══ -->
+
+<div id="screen-results" class="screen">
+  <header class="app-header">
+    <div class="logo">Lingua<span>Flash</span></div>
+    <div class="header-actions">
+      <button class="btn btn-ghost" onclick="showScreen('screen-home')">← Domů</button>
+      <button class="btn btn-coral" onclick="resetAllData()" style="font-size:0.78rem;padding:7px 11px;">🗑 Reset</button>
+    </div>
+  </header>
+  <div class="results-container">
+    <h2>Přehled pokroku</h2>
+    <p class="subtitle">Která slovíčka zvládáš a která potřebují opakování.</p>
+    <div class="result-summary">
+      <div class="result-card green"><div class="num" id="r-mastered">0</div><div class="lbl">Zvládnuto</div></div>
+      <div class="result-card amber"><div class="num" id="r-learning">0</div><div class="lbl">V procesu</div></div>
+      <div class="result-card red"><div class="num" id="r-hard">0</div><div class="lbl">Potřebuje práci</div></div>
+      <div class="result-card blue"><div class="num" id="r-total">0</div><div class="lbl">Celkem</div></div>
+    </div>
+    <div class="word-table">
+      <div class="word-table-header"><div>Anglicky</div><div>Česky</div><div>Zvládnutí</div></div>
+      <div id="word-table-body"></div>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <button class="btn btn-amber btn-lg" onclick="showScreen('screen-home')">▶ Procvičovat znovu</button>
+      <button class="btn btn-ghost" onclick="showScreen('screen-import')">➕ Přidat slova</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+const STORAGE_KEY = 'linguaflash_v2';
+let state = { words: [], sessions: 0, selectedMode: 'en-to-cz' };
+let session = { queue: [], current: null, currentIdx: 0, total: 0, correct: 0, wrong: 0, revealed: false };
+
+function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+function loadState() { try { const s = localStorage.getItem(STORAGE_KEY); if (s) state = { ...state, ...JSON.parse(s) }; } catch(e) {} }
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if (id === 'screen-home') updateHomeStats();
+  if (id === 'screen-results') renderResults();
+}
+
+function selectMode(el) {
+  document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  state.selectedMode = el.dataset.mode;
+}
+
+function updateHomeStats() {
+  document.getElementById('stat-words').textContent = state.words.length;
+  document.getElementById('stat-learned').textContent = state.words.filter(w => w.score >= 3).length;
+  document.getElementById('stat-sessions').textContent = state.sessions;
+  document.getElementById('guide-section').style.display = state.words.length === 0 ? 'block' : 'none';
+}
+
+// ═══ IMPORT ═══
+let parsedWords = [];
+function parseAndPreview() {
+  const raw = document.getElementById('import-textarea').value.trim();
+  if (!raw) { showToast('Vlož nejdřív seznam slovíček.'); return; }
+  parsedWords = [];
+  for (let line of raw.split('\n')) {
+    line = line.trim(); if (!line) continue;
+    let parts = null;
+    if (line.includes('=')) parts = line.split('=');
+    else if (line.includes('\t')) parts = line.split('\t');
+    else if (line.includes(' - ')) parts = line.split(' - ');
+    else if (line.includes(' – ')) parts = line.split(' – ');
+    else continue;
+    const en = parts[0].trim(), cz = parts.slice(1).join('=').trim();
+    if (en && cz) parsedWords.push({ en, cz });
+  }
+  const preview = document.getElementById('parsed-preview');
+  if (!parsedWords.length) { showToast('Nepodařilo se rozpoznat slovíčka. Zkontroluj formát.'); preview.classList.add('hidden'); return; }
+  document.getElementById('preview-count').textContent = `${parsedWords.length} slovíček`;
+  document.getElementById('preview-list').innerHTML = parsedWords.map((w, i) =>
+    `<div class="preview-item"><span class="eng">${esc(w.en)}</span><span class="cz">${esc(w.cz)}</span><button class="del-btn" onclick="removeParsed(${i})">✕</button></div>`
+  ).join('');
+  preview.classList.remove('hidden');
+  document.getElementById('import-confirm').style.display = 'inline-flex';
+}
+function removeParsed(i) { parsedWords.splice(i, 1); parseAndPreview(); }
+function importWords() {
+  if (!parsedWords.length) return;
+  let added = 0;
+  for (const w of parsedWords) {
+    if (!state.words.find(x => x.en.toLowerCase() === w.en.toLowerCase())) {
+      state.words.push({ en: w.en, cz: w.cz, score: 0, interval: 1, nextReview: 0, attempts: 0, correct: 0 });
+      added++;
+    }
+  }
+  saveState(); showToast(`✅ Přidáno ${added} slovíček!`);
+  showScreen('screen-home');
+  document.getElementById('import-textarea').value = '';
+  document.getElementById('parsed-preview').classList.add('hidden');
+  document.getElementById('import-confirm').style.display = 'none';
+  parsedWords = [];
+}
+function clearImport() {
+  document.getElementById('import-textarea').value = '';
+  document.getElementById('parsed-preview').classList.add('hidden');
+  document.getElementById('import-confirm').style.display = 'none';
+  parsedWords = [];
+}
+
+// ═══ PRACTICE ═══
+function getCardMode() {
+  if (state.selectedMode === 'mixed') return session.currentIdx % 2 === 0 ? 'en-to-cz' : 'cz-to-en';
+  return state.selectedMode;
+}
+
+function startPractice() {
+  if (!state.words.length) { showToast('Nejdřív přidej slovíčka!'); showScreen('screen-import'); return; }
+  const now = Date.now();
+  const queue = state.words.slice().sort((a, b) => {
+    const aDue = a.nextReview <= now ? 1 : 0, bDue = b.nextReview <= now ? 1 : 0;
+    if (aDue !== bDue) return bDue - aDue;
+    return (a.score || 0) - (b.score || 0);
+  }).slice(0, 20).map(w => ({ ...w }));
+  session = { queue, current: null, currentIdx: 0, total: queue.length, correct: 0, wrong: 0, revealed: false };
+  state.sessions++; saveState();
+  showScreen('screen-practice');
+  nextCard();
+}
+
+function nextCard() {
+  if (session.currentIdx >= session.total) { endSession(true); return; }
+  session.current = session.queue[session.currentIdx];
+  session.revealed = false;
+  const mode = getCardMode(), w = session.current;
+
+  document.getElementById('progress-fill').style.width = (session.currentIdx / session.total * 100) + '%';
+  document.getElementById('card-counter').textContent = `${session.currentIdx + 1} / ${session.total}`;
+  document.getElementById('session-score').textContent = `✓ ${session.correct}  ✗ ${session.wrong}`;
+  document.getElementById('practice-mode-badge').textContent = mode === 'en-to-cz' ? '🇬🇧→🇨🇿 Přelož do češtiny' : '🇨🇿→🇬🇧 Přelož do angličtiny';
+  document.getElementById('card-label').textContent = mode === 'en-to-cz' ? 'Přelož do češtiny:' : 'Přelož do angličtiny:';
+  document.getElementById('card-word').textContent = mode === 'en-to-cz' ? w.en : w.cz;
+  document.getElementById('card-hint').classList.remove('hidden');
+  const ans = document.getElementById('card-answer');
+  ans.classList.add('hidden');
+  ans.textContent = mode === 'en-to-cz' ? w.cz : w.en;
+  document.getElementById('conf-row').classList.add('hidden');
+  const card = document.getElementById('flashcard');
+  card.classList.remove('revealed');
+  card.style.animation = 'none'; card.offsetHeight; card.style.animation = '';
+}
+
+function revealAnswer() {
+  if (session.revealed) return;
+  session.revealed = true;
+  document.getElementById('card-hint').classList.add('hidden');
+  document.getElementById('card-answer').classList.remove('hidden');
+  document.getElementById('conf-row').classList.remove('hidden');
+  document.getElementById('flashcard').classList.add('revealed');
+}
+
+function rate(level) {
+  const stateWord = state.words.find(x => x.en === session.current.en);
+  if (stateWord) {
+    stateWord.attempts = (stateWord.attempts || 0) + 1;
+    if (level === 3) {
+      stateWord.score = Math.min(5, (stateWord.score || 0) + 1);
+      stateWord.correct = (stateWord.correct || 0) + 1;
+      stateWord.interval = Math.round((stateWord.interval || 1) * 2.5);
+      session.correct++;
+    } else if (level === 2) {
+      stateWord.score = Math.min(5, (stateWord.score || 0) + 0.5);
+      stateWord.correct = (stateWord.correct || 0) + 1;
+      stateWord.interval = Math.max(1, stateWord.interval || 1);
+      session.correct++;
+    } else {
+      stateWord.score = Math.max(0, (stateWord.score || 0) - 0.5);
+      stateWord.interval = 1;
+      session.wrong++;
+    }
+    stateWord.nextReview = Date.now() + (stateWord.interval || 1) * 60 * 60 * 1000;
+  }
+  saveState();
+  session.currentIdx++;
+  nextCard();
+}
+
+function endSession(completed = false) {
+  saveState();
+  if (completed) { showToast(`🎉 Hotovo! ✓ ${session.correct}  ✗ ${session.wrong}`); renderResults(); showScreen('screen-results'); }
+  else showScreen('screen-home');
+}
+
+// ═══ STUDY / CONTEXT ═══
+let studyCache = {}; // cache sentences per word
+let studyBatchIndex = 0;
+const STUDY_BATCH = 8;
+
+async function startStudy() {
+  if (!state.words.length) { showToast('Nejdřív přidej slovíčka!'); showScreen('screen-import'); return; }
+  showScreen('screen-study');
+  studyBatchIndex = 0;
+  document.getElementById('study-content').innerHTML = `<div class="study-loading"><div class="spinner"></div><div id="study-loading-text">Generuji příkladové věty…</div></div>`;
+  await loadStudyBatch(0);
+}
+
+async function loadStudyBatch(startIdx) {
+  const words = state.words.slice(startIdx, startIdx + STUDY_BATCH);
+  if (!words.length) return;
+
+  // Which words don't have cached sentences yet
+  const toFetch = words.filter(w => !studyCache[w.en]);
+
+  if (toFetch.length > 0) {
+    const list = toFetch.map(w => `"${w.en}" (${w.cz})`).join(', ');
+    try {
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 1500,
+          messages: [{
+            role: 'user',
+            content: `For each of these English words/phrases, write 2 natural example sentences showing real usage. The key word/phrase should be in bold using **word** markdown.
+
+Words: ${list}
+
+Return ONLY a JSON array, no explanation, no markdown fences. Format:
+[{"en":"word","sentences":["Sentence one with **word** used naturally.","Sentence two with **word** in different context."]}]`
+          }]
+        })
+      });
+      const data = await response.json();
+      let text = (data.content?.find(b => b.type === 'text')?.text || '').replace(/```json|```/g, '').trim();
+      const parsed = JSON.parse(text);
+      for (const item of parsed) {
+        studyCache[item.en] = item.sentences;
+      }
+    } catch(e) {
+      // Fallback: mark as error
+      for (const w of toFetch) studyCache[w.en] = null;
+    }
+  }
+
+  renderStudyCards(startIdx);
+}
+
+function renderStudyCards(startIdx) {
+  const container = document.getElementById('study-content');
+  const allWords = state.words;
+  const batch = allWords.slice(0, startIdx + STUDY_BATCH);
+  const hasMore = allWords.length > startIdx + STUDY_BATCH;
+
+  let html = batch.map(w => {
+    const sentences = studyCache[w.en];
+    let sentencesHtml = '';
+    if (sentences === null) {
+      sentencesHtml = `<div class="study-error">Nepodařilo se načíst věty. Zkus to znovu.</div>`;
+    } else if (!sentences) {
+      sentencesHtml = `<div class="study-sentence" style="color:var(--text-light)">Načítám…</div>`;
+    } else {
+      sentencesHtml = sentences.map(s =>
+        `<div class="study-sentence">${esc(s).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')}</div>`
+      ).join('');
+    }
+    return `<div class="study-word-card">
+      <div class="study-word-header">
+        <span class="study-word-en">${esc(w.en)}</span>
+        <span class="study-word-cz">${esc(w.cz)}</span>
+      </div>
+      <div class="study-sentences">${sentencesHtml}</div>
+    </div>`;
+  }).join('');
+
+  if (hasMore) {
+    html += `<button class="load-more-btn" onclick="loadMoreStudy(${startIdx + STUDY_BATCH})">⬇ Načíst další slovíčka</button>`;
+  }
+
+  container.innerHTML = html;
+}
+
+async function loadMoreStudy(startIdx) {
+  const btn = document.querySelector('.load-more-btn');
+  if (btn) { btn.textContent = '⏳ Načítám…'; btn.disabled = true; }
+  await loadStudyBatch(startIdx);
+}
+
+// ═══ RESULTS ═══
+function renderResults() {
+  const words = state.words;
+  document.getElementById('r-mastered').textContent = words.filter(w => w.score >= 3).length;
+  document.getElementById('r-learning').textContent = words.filter(w => w.score > 0 && w.score < 3).length;
+  document.getElementById('r-hard').textContent = words.filter(w => (w.attempts || 0) > 0 && w.score <= 0).length;
+  document.getElementById('r-total').textContent = words.length;
+  const body = document.getElementById('word-table-body');
+  if (!words.length) { body.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-light)">Zatím žádná slovíčka.</div>'; return; }
+  body.innerHTML = words.slice().sort((a, b) => (a.score||0) - (b.score||0)).map(w => {
+    const pct = Math.min(100, Math.round(((w.score||0)/5)*100));
+    const color = pct >= 60 ? 'var(--green)' : pct >= 30 ? 'var(--amber)' : 'var(--coral)';
+    return `<div class="word-row"><div class="eng">${esc(w.en)}</div><div class="cz">${esc(w.cz)}</div><div><div style="font-size:0.69rem;color:var(--text-light);margin-bottom:3px">${pct}%</div><div class="mastery-bar"><div class="mastery-fill" style="width:${pct}%;background:${color}"></div></div></div></div>`;
+  }).join('');
+}
+
+function resetAllData() {
+  if (!confirm('Smazat veškerá slovíčka a výsledky?')) return;
+  state = { words: [], sessions: 0, selectedMode: 'en-to-cz' };
+  studyCache = {};
+  saveState(); renderResults(); updateHomeStats(); showToast('🗑 Data smazána.');
+}
+
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function showToast(msg, d = 3000) {
+  const c = document.getElementById('toast-container'), t = document.createElement('div');
+  t.className = 'toast'; t.textContent = msg; c.appendChild(t);
+  setTimeout(() => t.remove(), d);
+}
+
+loadState();
+updateHomeStats();
+document.querySelectorAll('.mode-card').forEach(c => c.classList.toggle('selected', c.dataset.mode === state.selectedMode));
+</script>
+
+</body>
+</html>
